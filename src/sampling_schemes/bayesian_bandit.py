@@ -3,7 +3,7 @@ from itertools import product
 from functools import partial
 from wasserstein.utils import wasserstein_l1
 from acquisition.functions import empirical_entropy_finite_support
-from acquisition.functions import ndd_entropy
+# from acquisition.functions import ndd_entropy
 import logging
 from multiprocessing import Pool
 
@@ -178,8 +178,8 @@ def _get_improvement(phis, base_phis_to_use = None):
         improvement = wasserstein_l1(base_phis, phis, normalise=False)
     elif cost_func == "entropy_support":
         improvement = -empirical_entropy_finite_support(phis)
-    elif cost_func == "ndd_entropy":
-        improvement = -ndd_entropy(phis, k=k_upper_bound, decimals=5)
+    # elif cost_func == "ndd_entropy":
+    #     improvement = -ndd_entropy(phis, k=k_upper_bound, decimals=5)
     else:
         raise Exception("Incorrect acquisition function specified: {}!".format(cost_func))
 

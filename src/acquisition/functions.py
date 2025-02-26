@@ -3,7 +3,7 @@ from scipy.spatial.distance import jensenshannon
 from scipy.stats import entropy
 from scipy.spatial import Voronoi, ConvexHull
 from scipy.stats import rankdata
-import ndd
+# import ndd
 
 # Acquisition functions, only 2 entropy variants are used from here. The wasserstein with L1 cost is implemented in wasserstein/utils.py
 
@@ -45,12 +45,12 @@ def empirical_entropy_finite_support(dist, decimals=2):
     _, counts = np.unique(np.around(dist, decimals=decimals), return_counts=True, axis=0)
     return entropy(counts) # Scipy will normalise 
 
-def ndd_entropy(dist, k, decimals=100):
-    _, counts = np.unique(np.around(dist, decimals=decimals), return_counts=True, axis=0)
-    if counts.shape[0] == 1:
-        # NDD doesn't accept a count vector over 1 thing
-        counts = np.concatenate([counts, [0]], axis=0)
-    return ndd.entropy(counts, k=k)
+# def ndd_entropy(dist, k, decimals=100):
+#     _, counts = np.unique(np.around(dist, decimals=decimals), return_counts=True, axis=0)
+#     if counts.shape[0] == 1:
+#         # NDD doesn't accept a count vector over 1 thing
+#         counts = np.concatenate([counts, [0]], axis=0)
+#     return ndd.entropy(counts, k=k)
 
 def std_dev(dist):
     # Estimated standard deviation of population based on these samples

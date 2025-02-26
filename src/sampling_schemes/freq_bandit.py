@@ -60,7 +60,7 @@ class FreqBandit:
         self.logger.debug("Unresolved pairs has {} elements".format(len(self.unresolved_pairs)))
 
         # Uniformly pick a an unresolved pair and uniformly pick a strategy
-        pair = random.sample(self.unresolved_pairs, k=1)[0]
+        pair = random.sample(list(self.unresolved_pairs), k=1)[0]
         strat = pair[random.randint(0, 1)]
         return strat, {}
 
