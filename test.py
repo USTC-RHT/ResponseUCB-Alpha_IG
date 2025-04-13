@@ -1,1 +1,2 @@
-from ot import emd2
+import ot
+print('good')

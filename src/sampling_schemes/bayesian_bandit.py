@@ -50,9 +50,14 @@ class BayesianBandit:
 
         self.use_parallel = use_parallel
         if use_parallel:
-            self.pool = Pool(initializer=_init_worker, initargs=(self.num_strats, self.samples, self.total_samples, self.num_pops, self.alpha_rank, self.acquisition, self.flip_improvement))
+            self.pool = Pool(initializer=_init_worker, initargs=(self.num_strats, self.samples, self.total_samples, self.num_pops, self.alpha_rank, self.acquisition
+                            # self.flip_improvement
+                            ))
         
-        _init_worker(self.num_strats, self.samples, self.total_samples, self.num_pops, self.alpha_rank, self.acquisition, self.flip_improvement)
+        _init_worker(self.num_strats, self.samples, self.total_samples, self.num_pops, self.alpha_rank, 
+                     self.acquisition
+                    #  self.flip_improvement
+        )
 
     def __del__(self):
         try:

@@ -60,7 +60,8 @@ def run_exp(d):
                                     acquisition=exp["acquisition"], 
                                     expected_hallucinate=exp["expected_hallucinate"],
                                     expected_samples=exp["expected_hallucinate_samples"],
-                                    use_parallel=True,
+                                    # use_parallel=True,
+                                    use_parallel=False,
                                     repeat_sampling=exp["repeat_sampling"])
     elif exp["sampler"] == "payoff_bandit": # Payoff
         sampler = PayoffBayesianBandit(num_pops, num_strats, num_players, payoff_distrib=payoff_distrib, alpha_rank_func=alpha_rank_partial)
@@ -138,21 +139,21 @@ if __name__ == "__main__":
     # }
 
     # # Running on 2 Good, 2 Bad
-    env_params = {
-        "env_seed": [10 + i for i in range(1)],
-        "env": ["{}_Agent_Ties".format(4)],
-        "min_payoff": [0],
-        "max_payoff": [1],
-    }
-
-
-    # Running on 3 Good, 5 Bad
     # env_params = {
     #     "env_seed": [10 + i for i in range(1)],
-    #     "env": ["{}_Agent_Ties".format(8)],
+    #     "env": ["{}_Agent_Ties".format(4)],
     #     "min_payoff": [0],
     #     "max_payoff": [1],
     # }
+
+
+    # Running on 3 Good, 5 Bad
+    env_params = {
+        "env_seed": [10 + i for i in range(1)],
+        "env": ["{}_Agent_Ties".format(8)],
+        "min_payoff": [0],
+        "max_payoff": [1],
+    }
 
     base_params = {**env_params, **base_params}
     # -- End of setting env parameters --
@@ -266,8 +267,6 @@ if __name__ == "__main__":
 
     d = (0,exps[0],env_dict)
     info = run_exp(d)
-
-
 
 
     # sleep(10)
