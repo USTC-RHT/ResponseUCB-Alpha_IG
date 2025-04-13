@@ -2,8 +2,8 @@ from itertools import product
 from functools import partial
 from games.gaussian_one_pop import GaussianOnePopGames
 from games.bad_agent_ties import BadAgentTies
-from sampling_schemes.distributions.indep_normal import IndependentNormal
-from sampling_schemes.distributions.indep_normal_kernel import NormalKernel
+from sampling_schemes.distributions.indep_kernel import IndependentKernel
+from sampling_schemes.distributions.normal_kernel import NormalKernel
 from sampling_schemes.bayesian_bandit import BayesianBandit
 from sampling_schemes.freq_bandit import FreqBandit
 from sampling_schemes.random import RandomSampler
@@ -40,7 +40,7 @@ def run_exp(d):
 
     # Distribution over payoffs
     if exp["payoff_distrib"] == "indep_normal":
-        payoff_distrib = IndependentNormal(num_pops, num_strats, num_players, 
+        payoff_distrib = IndependentKernel(num_pops, num_strats, num_players, 
                                             starting_mu=exp["starting_mu"], 
                                             starting_var=exp["starting_var"], 
                                             noise_var=exp["noise_var"],
@@ -70,7 +70,7 @@ def run_exp(d):
     elif exp["sampler"] == "random": # Random
         sampler = RandomSampler(num_pops, num_strats, num_players, alpha_rank_func=alpha_rank_partial)
     
-    logging_info = run_sampling(payoffs, sampler, max_iters=exp["t_max"], graph_samples=exp["graphing_samples"])
+    logging_info = run_sampling(payoffs, sampler, max_iters=exp["max_iters"], graph_samples=exp["graph_samples"])
 
     exp_end_time = time.time()
     print("Finished exp {} in {:,} seconds".format(i+1, exp_end_time - exp_start_time))
@@ -118,17 +118,14 @@ if __name__ == "__main__":
         # "min_payoff": [0],
         # "max_payoff": [1],
 
-        "repeats": [1+i for i in range(3)], # Number of repeats of the same experimental config
+        "repeats": [1+i for i in range(1)], # 相同配置的实验重复次数
         "label": ["alphaRankExpsLabel"], # Label to assign these experiments
     
-        "t_max": [10*1000], # Maximum timesteps to run for
+        "max_iters": [1000], # 最大的迭代次数
 
-        "graphing_samples": [2000], # Number of alpha-ranks to save 100 times during training for graphing
+        "graph_samples": [100], # Number of alpha-ranks to save 100 times during training for graphing
 
     }
-
-    # -- Setting the environment parameters -- #
-    # -- Comment/Uncomment appropriately -- #
 
     # # Running on 4x4 Gaussian Games
     # env_params = {
@@ -138,7 +135,7 @@ if __name__ == "__main__":
     #     "max_payoff": [2],
     # }
 
-    # # Running on 2 Good, 2 Bad
+    # Running on 2 Good, 2 Bad
     # env_params = {
     #     "env_seed": [10 + i for i in range(1)],
     #     "env": ["{}_Agent_Ties".format(4)],
@@ -155,7 +152,7 @@ if __name__ == "__main__":
         "max_payoff": [1],
     }
 
-    base_params = {**env_params, **base_params}
+    base_params = {**base_params, **env_params}
     # -- End of setting env parameters --
 
     # Parameters for the algorithms that are going to be run
@@ -163,8 +160,10 @@ if __name__ == "__main__":
         # ResponseGraphUCB with a range of \delta values
         # {
         #     "sampler": ["freq2"],
-        #     "delta": [0.4, 0.3, 0.2, 0.1, 0.05, 0.01, 0.001],
-        #     "repeats": [1+i for i in range(5)],
+        #     # "delta": [0.4, 0.3, 0.2, 0.1, 0.05, 0.01, 0.001],
+        #     # "repeats": [1+i for i in range(5)],
+        #     "delta": [0.001],
+        #     "repeats": [1+i for i in range(1)],
         # },
 
         # # Random sampling
@@ -182,17 +181,17 @@ if __name__ == "__main__":
         # },
 
         # # \alphaIG
-        # {
-        #     "payoff_distrib": ["indep_normal"],
-        #     "expected_hallucinate": [True],
-        #     "expected_hallucinate_samples": [10],
-        #     "hallucinate_samples": [100],
-        #     "starting_var": [1],
-        #     "noise_var": [0.5],
-        #     "mc_samples": [500],
-        #     "acquisition": ["entropy_support"],
-        #     "repeat_sampling": [500],
-        # },
+        {
+            "payoff_distrib": ["indep_normal"],
+            "expected_hallucinate": [True],
+            "expected_hallucinate_samples": [10],    # Ne
+            "hallucinate_samples": [100],            # Nc
+            "starting_var": [1],
+            "noise_var": [0.5],
+            "mc_samples": [500],                     # Nb
+            "acquisition": ["entropy_support"],
+            "repeat_sampling": [500],                # Nr
+        },
 
         # # \alphaWass
         # {
@@ -209,17 +208,17 @@ if __name__ == "__main__":
 
 
         # \alphaIG and \alphaWass with prior info
-        {
-            "payoff_distrib": ["normal_kernel"],
-            "expected_hallucinate": [True],
-            "expected_hallucinate_samples": [10],
-            "hallucinate_samples": [100],
-            "starting_var": [1],
-            "noise_var": [0.5],
-            "mc_samples": [500],
-            "acquisition": ["l1_relative", "entropy_support"],
-            "repeat_sampling": [100],
-        },
+        # {
+        #     "payoff_distrib": ["normal_kernel"],
+        #     "expected_hallucinate": [True],
+        #     "expected_hallucinate_samples": [10],
+        #     "hallucinate_samples": [100],
+        #     "starting_var": [1],
+        #     "noise_var": [0.5],
+        #     "mc_samples": [500],
+        #     "acquisition": ["l1_relative", "entropy_support"],
+        #     "repeat_sampling": [100],
+        # },
 
     ]
 

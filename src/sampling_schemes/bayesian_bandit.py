@@ -41,7 +41,7 @@ class BayesianBandit:
         self.next_sample = (None, 0) # Entry to sample next and number of more times to sample it
         self.random_iters = 0
 
-        self.expected_hallucinate = expected_hallucinate
+        self.expected_hallucinate = expected_hallucinate    # True
         self.expected_samples = expected_samples
         if not self.expected_hallucinate and self.expected_samples > 1:
             raise Exception("Using more than 1 sample when hallucinating the mean.")
@@ -67,7 +67,9 @@ class BayesianBandit:
             pass # Happens
 
     def choose_entry_to_sample(self):
+        # α-IG卡在500步的原因是由于 repeat_sampling对应500 即先随机采样500次
         if self.random_iters < self.repeat_sampling:
+            # picking the entry with the lowest number of samples
             strat_to_sample = self.payoffs.info_gain_entry()
             self.random_iters += 1
             return strat_to_sample, {}
@@ -78,24 +80,29 @@ class BayesianBandit:
 
         logging = {}
 
+        # 所有策略的组合形成的列表
         strats = list(product(range(self.num_strats), repeat=self.num_players))
 
         base_phis = None
+        #  self.samples = mc_samples 500
+        #  self.total_samples = mc_samples 500
         if self.acquisition in ["l1_relative"]: # Wasserstein with L1 cost
+            # 采样 {total_samples}个原分布对应的 α-rank 存在base_phis中
             base_phis = []
             for _ in range(self.total_samples):
                 m = self.payoffs.sample()
                 phi = self.alpha_rank(m)
                 base_phis.append(phi)
-            base_phis = np.array(base_phis)
+            base_phis = np.array(base_phis)    
         all_imps_and_entries = None
-        for i in range(self.expected_samples):
+        for i in range(self.expected_samples):   # expected_hallucinate_samples {Ne} 10
+            # 对每个通道进行“幻想采样”得到 Payoff Matrix的后验 通过后验采样{Nb}个α-rank
             strat_improvement = partial(_get_entry_improvement,
                                         payoffs=self.payoffs.hallucinate_sample_func(hallucinate_mean=not self.expected_hallucinate),
                                         base_phis_to_use=base_phis)
             improvements_and_entries = self.pool.map(strat_improvement, strats) if self.use_parallel else list(map(strat_improvement, strats))
             if all_imps_and_entries is None:
-                all_imps_and_entries = improvements_and_entries
+                all_imps_and_entries = improvements_and_entries  # 返回 strat, improvement
             else:
                 all_imps_and_entries = [(a, b+d) for (a,b), (c,d) in zip(all_imps_and_entries, improvements_and_entries)]
         all_imps_and_entries = [(a, b/self.expected_samples) for (a,b) in all_imps_and_entries]
@@ -105,7 +112,9 @@ class BayesianBandit:
         logging["improvements"] = np.array(improvements)
         self.logger.debug("Max improvement: {:.3f}, Mean: {:.3f}, Min: {:.3f}".format(max_value, np.mean(improvements), np.min(improvements)))
 
-        self.next_sample = (max_strat, self.repeat_sampling-1)
+        # 重复采样算出的 Info_Gain 最大的策略 self.repeat_sampling {Nr}次  
+        # self.next_sample = (max_strat, self.repeat_sampling -1)
+        self.next_sample = (max_strat, 50 -1)
 
         return max_strat, logging
 
@@ -119,10 +128,12 @@ class BayesianBandit:
             return np.array([phi])
         else:
             # For debugging and logging approximate the distribution over alpha-rankings
+            # 采样并计算α-rank {graph_samples}次
             samples = [self.payoffs.sample() for _ in range(self.samples if graph_samples is None else graph_samples)]
             phis = self.pool.map(_alpha_rank_sample, samples) if self.use_parallel else list(map(_alpha_rank_sample, samples)) # To keep the same code for both
 
             # Also return the most probable alpha rank and its estimated probability
+            # 统计出现次数最多的 α-rank，并计算其出现的概率
             unique_phis, counts = np.unique(np.around(phis, decimals=5), return_counts=True, axis=0)
             argmax_entry = np.argmax(counts)
             p_phi = unique_phis[argmax_entry]
@@ -193,6 +204,7 @@ def _get_improvement(phis, base_phis_to_use = None):
 
 def _get_entry_improvement(strat, payoffs, base_phis_to_use=None):
     phis = []
+    # samples对应 self.samples = mc_samples 500
     for _ in range(samples):
         m_sampled = payoffs(strat)
         phi = alpha_rank(m_sampled)

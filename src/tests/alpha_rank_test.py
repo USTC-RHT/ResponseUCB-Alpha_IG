@@ -1,7 +1,5 @@
 import numpy as np
-import sys
-sys.path.append(".")
-from src.alpha_rank import alpha_rank
+from alpha_rank_copy import alpha_rank
 
 def rock_paper_scissors(graphing=False):
 
@@ -32,7 +30,7 @@ def rock_paper_scissors(graphing=False):
         plt.ylabel(r"Mass in $\pi$")
         plt.yticks([i/10 for i in range(11)])
         plt.grid(True, which="major")
-        plt.savefig("graphs/alpha_rank_reprod/rps_alpha_strats.png")
+        # plt.savefig("graphs/alpha_rank_reprod/rps_alpha_strats.png")
         plt.close()
 
 def biased_rock_paper_scissors_multipop(graphing=False, mutations=False):
@@ -121,20 +119,30 @@ def biased_rock_paper_scissors(graphing=False, mutations=False):
 
 def bos(graphing=False):
 
+    # payoffs = [
+    #     np.array([[3, 0],
+    #               [0, 2]]),
+    #     np.array([[2, 0],
+    #               [0, 3]])
+    # ]
     payoffs = [
-        np.array([[3, 0],
-                  [0, 2]]),
-        np.array([[2, 0],
-                  [0, 3]])
+        np.array([[2, 1, 0],
+                  [1, 2, 1],
+                  [0, 0, 2]]),
+        np.array([[1, 2, 0],
+                  [2, 1, 0],
+                  [0, 1, 2]])
     ]
 
     alphas = []
     strat_probs = []
     # Goes haywire after 10^(-1)
-    for alpha in np.logspace(-4, -1, num=30, base=10): 
+    for alpha in np.logspace(-4, 1, num=30, base=10): 
         phi = alpha_rank(payoffs, alpha=alpha)
         alphas.append(alpha)
         strat_probs.append(tuple(phi))
+        print(alpha)
+        print(phi)
 
     if graphing:
         import matplotlib.pyplot as plt
@@ -150,7 +158,7 @@ def bos(graphing=False):
         plt.ylabel(r"Mass in $\pi$")
         plt.yticks([i/10 for i in range(11)])
         plt.grid(True, which="major")
-        plt.savefig("graphs/alpha_rank_reprod/bos.png")
+        plt.savefig("bos.png")
         plt.close()
 
 def transpose_test(graphing=False):
@@ -300,13 +308,13 @@ def infinite_alpha_rank_tests():
 if __name__ == "__main__":
     # Finite alpha tests, mostly done by eye (comparing graphs to the alpha rank paper, https://arxiv.org/abs/1903.01373)
     graphing = True
-    transpose_test(graphing=graphing)
-    rock_paper_scissors(graphing=graphing)
-    biased_rock_paper_scissors(graphing=graphing, mutations=False)
-    biased_rock_paper_scissors_multipop(graphing=graphing, mutations=False)
+    # transpose_test(graphing=graphing)
+    # rock_paper_scissors(graphing=graphing)
+    # biased_rock_paper_scissors(graphing=graphing, mutations=False)
+    # biased_rock_paper_scissors_multipop(graphing=graphing, mutations=False)
     bos(graphing=graphing)
-    prisoners_dilemma(graphing=graphing)
-    bernoulli_one_pop(graphing=graphing)
+    # prisoners_dilemma(graphing=graphing)
+    # bernoulli_one_pop(graphing=graphing)
 
-    # Infinite alpha tests
-    infinite_alpha_rank_tests()
+    # # Infinite alpha tests
+    # infinite_alpha_rank_tests()

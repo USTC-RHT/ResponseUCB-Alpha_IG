@@ -22,6 +22,8 @@ def run_sampling(payoff_matrix_sampler, sampler, max_iters=100, graph_samples=10
         if t % (max_iters//100) == 0:
             logger.warning("Iteration {:,}".format(t))
             # Periodically get a better approximation of the distribution
+            # mean为 False
+            # 采样并计算 {graph_samples}次 α-rank
             alpha_rankings_distrib_samples, prob_alpha_rank = sampler.alpha_rankings_distrib(graph_samples=graph_samples)
             alpha_ranking_distrib_more.append(alpha_rankings_distrib_samples)
 
@@ -40,6 +42,7 @@ def run_sampling(payoff_matrix_sampler, sampler, max_iters=100, graph_samples=10
         logger.debug("Iteration {:,}".format(t))
 
         # Log the mean alpha rank (alpha rank of mean payoff estimates)
+        # 用每个通道的均值来计算 α-rank
         mean_alpha_rank = sampler.alpha_rankings_distrib(mean=True)
         mean_alpha_ranks.append(mean_alpha_rank)
         if true_alpha_rank is not None:
@@ -82,3 +85,5 @@ def run_sampling(payoff_matrix_sampler, sampler, max_iters=100, graph_samples=10
         "payoff_matrix_means": payoff_matrix_means,
         "payoff_matrix_vars": payoff_matrix_vars,
     }
+
+# 哪一个指标最能说明得到的 α-rank值呢？

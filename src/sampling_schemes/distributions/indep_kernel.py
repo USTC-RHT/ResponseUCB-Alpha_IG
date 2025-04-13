@@ -12,7 +12,7 @@ The data is assumed to be drawn from a Gaussian with unknown mean and variance '
 """
 
 
-class IndependentNormal:
+class IndependentKernel:
 
     def __init__(self, num_pops, num_strats, num_players, starting_mu=0.5, starting_var=1, hallucination_samples=1, noise_var=1, estimate_noise=False):
         self.num_strats = num_strats
@@ -98,6 +98,7 @@ class IndependentNormal:
                         starting_mu=self.starting_mu,
                         starting_var=self.starting_var,
                         noise_var=self.noise_var,
+                        # （带有噪声）对先验分布进行“幻想采样”
                         halluc_sample=self.sample_mean() if hallucinate_mean else self.sample() + np.random.normal(np.zeros_like(self.means), self.noise_var))
 
     def hallucinate_sample_prob_func(self, hallucinate_mean=True):
@@ -154,6 +155,7 @@ class IndependentNormal:
         return np.copy(self.means), np.copy(self.var)
 
 
+# hallucinate_samples 是 {Nc}
 def _build_mean_var(strat, running_total, counts, num_pops, hallucinate_samples, starting_mu, starting_var, noise_var, halluc_sample):
     new_counts = counts + 0
     new_running_total = running_total + 0

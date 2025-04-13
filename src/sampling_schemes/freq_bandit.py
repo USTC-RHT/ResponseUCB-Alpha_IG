@@ -121,9 +121,11 @@ class FreqBandit:
         if mean:
             return np.array([phi])
         else:
+            # 在每个通道的置信区间中均匀采样一个值来计算 α-rank
             samples = [self.sample() for _ in range(graph_samples)]
             phis = [self.alpha_rank(p) for p in samples]
             return np.array(phis), np.array([phi])
 
     def payoff_distrib(self):
+        # 方差均为0 不是分布，是置信区间！
         return np.copy(self.means), np.zeros_like(self.means)
